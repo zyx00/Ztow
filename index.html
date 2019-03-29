@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			ul,ol{
+				list-style: none;
+			}
+			img{
+				vertical-align: top;
+			}
+			.box{
+				width: 500px;
+				height: 200px;
+				padding: 5px;
+				border: 1px solid gray;
+				margin: 100px auto;
+			}
+			.box .inner{
+				width: 500px;
+				height: 200px;
+				position: relative;
+				overflow: hidden;
+			}
+			.box .inner ul{
+				width: 600%;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+			.box .inner ul li{
+				float: left;
+			}
+			
+			.box .inner ol{
+				position: absolute;
+				bottom: 5px;
+				right: 10px;
+			}
+			.box .inner ol li{
+				float: left;
+				width: 20px;
+				height: 20px;
+				background: white;
+				text-align: center;
+				line-height: 20px;
+				margin-left: 6px;
+				cursor: pointer;
+				border: 1px solid gray;
+			}
+			.box .inner ol li.current{
+				background: yellow;
+				margin-top: -4px;
+				padding: 2px;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div class="box">
+			<div class="inner">
+				<ul>
+					<li><img src="img/1.jpg" width="500" height="200"></li>
+					<li><img src="img/2.jpg" width="500" height="200"></li>
+					<li><img src="img/3.jpg" width="500" height="200"></li>
+					<li><img src="img/4.jpg" width="500" height="200"></li>
+					<li><img src="img/5.jpg" width="500" height="200"></li>
+				</ul>
+				<!--<ol>
+					<li class="current">1</li>
+					<li>2</li>
+					<li>3</li>
+					<li>4</li>
+					<li>5</li>
+				</ol>-->
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var box=document.getElementsByClassName("box")[0];
+		var inner=box.children[0];
+		var ul=inner.children[0];
+		var ulLis=ul.children;
+		var timer=null;
+		//无缝滚动，在最后一个li后面，追加第一个li
+		ul.appendChild(ulLis[0].cloneNode(true));
+		//动态创建ol
+		var ol=document.createElement("ol");
+		for(var i=0;i<ulLis.length-1;i++){
+			var li=document.createElement("li");
+			li.innerHTML=i+1;
+			ol.appendChild(li);
+		}
+		inner.appendChild(ol);
+		ol.children[0].className="current";
+		var olLis=ol.children;
+		
+		//封装的动画函数
+		 function animate(obj,target){
+	        clearInterval(obj.timer);  // 先清除定时器
+	        var speed = obj.offsetLeft < target ? 15 : -15;  // 用来判断 应该 +  还是 -
+	        obj.timer = setInterval(function() {
+	            var result = target - obj.offsetLeft; // 因为他们的差值不会超过5
+	            obj.style.left = obj.offsetLeft + speed + "px";
+	            if(Math.abs(result)<=15)  // 如果差值不小于 5 说明到位置了
+	            {
+	                clearInterval(obj.timer);
+	                obj.style.left = target + "px";  // 有5像素差距   我们直接跳转目标位置
+	            }
+	        },10)
+    	}
+		
+		//开始运动
+		var key=0;//记录运动第几张图片
+		var square=0;//记录指示器的下标
+		function fn(){
+			key++;
+			if(key>olLis.length){//当key=6时，展示的是第六章图，第一张和第六章图一样，迅速调回
+				ul.style.left="0px";
+				key=1;
+			}
+			animate(ul,-key*500);
+			
+			//指示器跟着动
+			for(var i=0;i<olLis.length;i++){
+				olLis[i].className="";
+			}
+			square++;
+			if(square>=olLis.length){
+				square=0;
+			}
+			olLis[square].className="current";
+		}
+		//鼠标经过指示器时，的动画
+		for(var i=0;i<olLis.length;i++){
+			olLis[i].index=i;
+			olLis[i].onmouseover=function(){
+				for(var i=0;i<olLis.length;i++){
+					olLis[i].className="";
+				}
+				this.className="current";
+				animate(ul,-this.index*500);
+				key=this.index;
+				square=this.index;
+			}
+		}
+		
+		
+		
+		timer=setInterval(fn,1000);
+		
+		box.onmouseover=function(){
+			clearInterval(timer);
+		}
+		box.onmouseout=function(){
+			timer=setInterval(fn,1000);
+		}
+	</script>
+</html>
